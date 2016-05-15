@@ -9,7 +9,7 @@ provider "aws" {
 resource "aws_security_group" "radius" {
   name = "${var.security_group_name}"
   description = "Allow RADIUS from world, SSH from org"
-  vpc_id = "${var.vpc_id}"
+  # vpc_id = "${var.vpc_id}"
 
   # ssh from org
   ingress {
@@ -62,7 +62,7 @@ resource "aws_launch_configuration" "radius" {
   associate_public_ip_address = false
   ebs_optimized = false
   key_name = "${var.key_name}"
-  iam_instance_profile = "${aws_iam_instance_profile.radius.id}"
+  #iam_instance_profile = "${aws_iam_instance_profile.radius.id}"
   user_data = "${template_file.user_data.rendered}"
 
   lifecycle {
@@ -77,7 +77,7 @@ resource "aws_launch_configuration" "radius" {
 
 resource "aws_autoscaling_group" "radius" {
   availability_zones = ["${split(",", var.aws_availability_zones)}"]
-  vpc_zone_identifier = ["${split(",", var.aws_subnet_ids)}"]
+  #vpc_zone_identifier = ["${split(",", var.aws_subnet_ids)}"]
   max_size = "${var.instances}"
   min_size = "${var.instances}"
   desired_capacity = "${var.instances}"
@@ -87,7 +87,7 @@ resource "aws_autoscaling_group" "radius" {
 
   tag {
     key = "Name"
-    value = "${format("ura-%s", var.aws_region)}"
+    value = "${format("ura-%s", var.aws_availability_zones)}"
     propagate_at_launch = true
   }
   tag {
