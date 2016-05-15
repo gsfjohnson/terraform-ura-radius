@@ -2,7 +2,6 @@
 
 variable "owner_tag" {
   description = "Who owns the instance."
-  default = "n/a"
 }
 
 variable "environment_tag" {
@@ -12,12 +11,10 @@ variable "environment_tag" {
 
 variable "fund_tag" {
   description = "Fund for instance."
-  default = "n/a"
 }
 
 variable "org_tag" {
   description = "Org for instance."
-  default = "n/a"
 }
 
 variable "application_tag" {
@@ -27,7 +24,6 @@ variable "application_tag" {
 
 variable "clientdepartment_tag" {
   description = "Customer"
-  default = "n/a"
 }
 
 ###################################################################
@@ -38,7 +34,6 @@ variable "clientdepartment_tag" {
 
 variable "key_name" {
   description = "SSH keypair name to use."
-  default = "radius"
 }
 
 variable "aws_region" {
@@ -62,9 +57,9 @@ variable "security_group_name" {
 
 ### MANDATORY ###
 
-variable "vpc_id" {
-  description = "VPC id"
-}
+#variable "vpc_id" {
+#  description = "VPC id"
+#}
 
 variable "internal_cidr_blocks"{
   default = "0.0.0.0/0"
@@ -75,9 +70,9 @@ variable "internal_cidr_blocks"{
 ###################################################################
 
 ### MANDATORY ###
-variable "aws_subnet_ids" {
-  description = "AWS subnet IDs, comma seperated, for deployment."
-}
+#variable "aws_subnet_ids" {
+#  description = "AWS subnet IDs, comma seperated, for deployment."
+#}
 
 ###################################################################
 # RADIUS configuration below
