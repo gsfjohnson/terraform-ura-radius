@@ -41,8 +41,8 @@ variable "aws_region" {
   default = "us-west-2"
 }
 
-variable "aws_availability_zones" {
-  description = "AWS region to launch servers."
+variable "aws_availability_zone" {
+  description = "AWS AZ to launch servers."
   default = "us-west-2b"
 }
 
@@ -61,8 +61,8 @@ variable "security_group_name" {
 #  description = "VPC id"
 #}
 
-variable "internal_cidr_blocks"{
-  default = "0.0.0.0/0"
+variable "org_cidr_blocks"{
+  description = "Organizations cidr blocks"
 }
 
 ###################################################################
@@ -113,4 +113,21 @@ variable "aws_ebs_volume_size" {
 
 variable "aws_ebs_volume_encryption" {
   default = false
+}
+
+variable "aws_r53_zone_id" {
+  description = "AWS Route53 Zone ID, e.g. Z1XPTMOSAOMS"
+}
+
+variable "aws_r53_zone_domain" {
+  description = "AWS Route53 Zone Domain, e.g. example.org"
+}
+
+variable "aws_r53_record_name" {
+  description = "Hostname to use in Zone, e.g. radius"
+}
+
+variable "aws_r53_record_addl_a" {
+  description = "Addl addresses for record"
+  default = ""
 }

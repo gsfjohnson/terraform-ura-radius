@@ -16,7 +16,7 @@ resource "aws_security_group" "radius" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["${split(",", var.internal_cidr_blocks)}"]
+    cidr_blocks = ["${split(",", var.org_cidr_blocks)}"]
   }
 
   # radius from world
@@ -47,7 +47,7 @@ resource "template_file" "user_data" {
     aws_ebs_volume_path     = "${var.aws_ebs_volume_path}"
     aws_sg                  = "${aws_security_group.radius.id}"
     aws_region              = "${var.aws_region}"
-    aws_availability_zones  = "${var.aws_availability_zones}"
+    aws_availability_zone  = "${var.aws_availability_zone}"
   }
 
   lifecycle {
@@ -55,15 +55,25 @@ resource "template_file" "user_data" {
   }
 }
 
-resource "aws_launch_configuration" "radius" {
-  image_id = "${var.aws_ami_id}"
+resource "aws_instance" "radius" {
+  ami = "${var.aws_ami_id}"
   instance_type = "${var.instance_type}"
-  security_groups = ["${split(",", replace(concat(aws_security_group.radius.id, ",", var.additional_security_groups), "/,\\s?$/", ""))}"]
-  associate_public_ip_address = false
+  vpc_security_group_ids = ["${split(",", replace(concat(aws_security_group.radius.id, ",", var.additional_security_groups), "/,\\s?$/", ""))}"]
+  associate_public_ip_address = true
   ebs_optimized = false
   key_name = "${var.key_name}"
-  #iam_instance_profile = "${aws_iam_instance_profile.radius.id}"
   user_data = "${template_file.user_data.rendered}"
+  availability_zone = "${var.aws_availability_zone}"
+
+  tags {
+    Name= "${format("ura-%s", var.aws_availability_zone)}"
+    Owner = "${var.owner_tag}"
+    Application = "${var.application_tag}"
+    Environment = "${var.environment_tag}"
+    Fund = "${var.fund_tag}"
+    Org = "${var.org_tag}"
+    ClientDepartment = "${var.clientdepartment_tag}"
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -75,53 +85,11 @@ resource "aws_launch_configuration" "radius" {
   }
 }
 
-resource "aws_autoscaling_group" "radius" {
-  availability_zones = ["${split(",", var.aws_availability_zones)}"]
-  #vpc_zone_identifier = ["${split(",", var.aws_subnet_ids)}"]
-  max_size = "${var.instances}"
-  min_size = "${var.instances}"
-  desired_capacity = "${var.instances}"
-  default_cooldown = 30
-  force_delete = true
-  launch_configuration = "${aws_launch_configuration.radius.id}"
-
-  tag {
-    key = "Name"
-    value = "${format("ura-%s", var.aws_availability_zones)}"
-    propagate_at_launch = true
-  }
-  tag {
-    key = "Owner"
-    value = "${var.owner_tag}"
-    propagate_at_launch = true
-  }
-  tag {
-    key = "Application"
-    value = "${var.application_tag}"
-    propagate_at_launch = true
-  }
-  tag {
-    key = "Environment"
-    value = "${var.environment_tag}"
-    propagate_at_launch = true
-  }
-  tag {
-    key = "Fund"
-    value = "${var.fund_tag}"
-    propagate_at_launch = true
-  }
-  tag {
-    key = "Org"
-    value = "${var.org_tag}"
-    propagate_at_launch = true
-  }
-  tag {
-    key = "ClientDepartment"
-    value = "${var.clientdepartment_tag}"
-    propagate_at_launch = true
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
+resource "aws_route53_record" "radius" {
+  zone_id = "${var.aws_r53_zone_id}"
+  name = "${format("%s.%s", var.aws_r53_record_name, var.aws_r53_zone_domain)}"
+  type = "A"
+  ttl = "300"
+  records = ["${aws_instance.radius.public_ip}"]
+  records = ["${split(",", replace(concat(aws_instance.radius.public_ip, ",", var.aws_r53_record_addl_a), "/,\\s?$/", ""))}"]
 }
