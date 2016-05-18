@@ -34,6 +34,10 @@ resource "aws_security_group" "radius" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  tags {
+    Name = "${var.security_group_name}"
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -90,6 +94,13 @@ resource "aws_route53_record" "radius" {
   name = "${format("%s.%s", var.aws_r53_record_name, var.aws_r53_zone_domain)}"
   type = "A"
   ttl = "300"
-  records = ["${aws_instance.radius.public_ip}"]
   records = ["${split(",", replace(concat(aws_instance.radius.public_ip, ",", var.aws_r53_record_addl_a), "/,\\s?$/", ""))}"]
+}
+
+resource "aws_route53_record" "awsadius" {
+  zone_id = "${var.aws_r53_zone_id}"
+  name = "${format("awsradius.%s", var.aws_r53_zone_domain)}"
+  type = "A"
+  ttl = "300"
+  records = ["${aws_instance.radius.public_ip}"]
 }
